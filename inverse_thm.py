@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 
 B_len = 200
 mat_dim = 25
-mse=[]
+mse = []
+
+
 def inverse_thm(A, B, B_len):
     for i in range(B_len):
         if i == 0:
@@ -15,9 +17,9 @@ def inverse_thm(A, B, B_len):
     return C
 
 
-A =  np.identity(mat_dim)
+A = np.identity(mat_dim)
 
-for i1 in range(1,B_len):
+for i1 in range(1, B_len):
     print(i1)
     B = np.zeros([i1, mat_dim, mat_dim])
     A_inverse = np.linalg.inv(A)
@@ -29,16 +31,16 @@ for i1 in range(1,B_len):
         T = T + B[i]
     T = T - A
 
-
     R = inverse_thm(A, B, i1)
     # print('Via Algorithm:')
     # print(R)
     T_inverse = np.linalg.inv(T)
     # print('Actual: ')
     # print(T_inverse)
-    mse.append(((R - T_inverse)**2).mean(axis=None))
+    mse.append(((R - T_inverse) ** 2).mean(axis=None))
 
 plt.plot(mse)
 plt.ylabel('MSE Element-Wisely')
 plt.xlabel('# of Samples')
+plt.ylim((0, 1))
 plt.show()
