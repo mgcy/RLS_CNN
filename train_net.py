@@ -56,6 +56,14 @@ def big_F(S):
     return f
 
 
+def F_inverse(f):
+    # len_f = len(f) # 12
+    S = np.zeros((12, 4, 4))
+    for i in range(12):
+        S[i] = f[i * 16:(i + 1) * 16].reshape(4, 4)
+    return S
+
+
 # Load the dataset
 
 # Try the single-image case first
@@ -95,7 +103,7 @@ for f1 in range(6):
             s1 = vect_gen(S1[f1], i2, j2)
             for f2 in range(12):
                 C2[f2, i2, j2] = C2[f2, i2, j2] + np.dot(s1, k2[f1, f2])
-
+# second pooling
 for f2 in range(12):
     C2[f2] = sigmoid(C2[f2])
     S2[f2] = max_pool(C2[f2])
@@ -107,13 +115,19 @@ f = big_F(S2)
 net = sigmoid(np.matmul(f, W))
 
 # RLS training
-f = f.reshape(192,1)
-ft = f.reshape(1,192)
+f = f.reshape(192, 1)
+ft = f.reshape(1, 192)
 R1 = np.matmul(f, f.reshape(1, 192))
 for i in range(10):
     Delta1 = f * Y_tar[i]
-    # take temporally inverse
+    # update W
     P = np.identity(192)
     g = (np.matmul(P, f)) / (1 + np.matmul(np.matmul(ft, P), f))
     P = np.matmul((np.identity(192) - np.matmul(g, ft)), P)
     W[:, i] = W[:, i] + np.matmul(g, (Y_tar[i] - np.matmul(ft, W[:, i])))
+
+# update k2
+# obtain partial L / partial f
+P_f = np.zeros(192)
+for i in range(10):
+    P_f = P_f - W[:, i] * e3
