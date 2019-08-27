@@ -12,7 +12,7 @@ def vect_gen(X, index_i, index_j):
     # X is the input image for convolution
     # index of the resulting image, from 0 to 23
     tmp_mat = X[index_i:index_i + 5, index_j:index_j + 5]
-    tmp_vect = tmp_mat.reshape((25))
+    tmp_vect = tmp_mat.reshape(25)
     return tmp_vect
 
 
@@ -36,6 +36,19 @@ def mean_pool(C):
         for i2 in range(hei):
             S[i1, i2] = np.mean(C[i1 * 2:i1 * 2 + 2, i2 * 2:i2 * 2 + 2])
     return S
+
+
+def inverse_pool(S):
+    # inverse pooling
+    dim = int(S.shape[0])
+    wid = int(S.shape[1] * 2)
+    hei = int(S.shape[2] * 2)
+    C = np.zeros(dim, wid, hei)
+    for i in range(dim):
+        for i1 in range(S.shape[1]):
+            for i2 in range(S.shape[2]):
+                C[dim, i1 * 2:i1 * 2 + 2, i2 * 2:i2 * 2 + 2] = S[dim, i1, i2]
+    return C
 
 
 def sigmoid(x):
@@ -129,5 +142,22 @@ for i in range(10):
 # update k2
 # obtain partial L / partial f
 P_f = np.zeros(192)
-for i in range(10):
-    P_f = P_f - W[:, i] * e3
+e3 = []
+for q in range(10):
+    e3[q] = Y_tar - np.matmul(f, W[:, q])
+    P_f = P_f - W[:, q] * e3[q]
+
+# obtain partial L / parital S2
+P_S2 = F_inverse(P_f)
+
+# obtain partial L / parial C2
+P_C2 = inverse_pool(P_S2)
+
+# obtain Y, R2 and Delta2
+for l in range(6):
+    for beta in range(12):
+        Y = 0
+        for lp in range(6):
+            if lp != l:
+                Y = Y +
+
