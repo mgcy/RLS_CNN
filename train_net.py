@@ -77,6 +77,17 @@ def F_inverse(f):
     return S
 
 
+def get_Y(S1, r, lp, betap):
+    # r from 0 to 24^2-1
+    Y = 0
+    for l in range(6):
+        if l != lp:
+            index_i = int(r / 8)
+            index_j = r - index_i * 8
+            Y = Y + np.matmul(vect_gen(S1, index_i, index_j), k2[l, betap, :])
+    return Y
+
+
 # Load the dataset
 
 # Try the single-image case first
@@ -154,10 +165,10 @@ P_S2 = F_inverse(P_f)
 P_C2 = inverse_pool(P_S2)
 
 # obtain Y, R2 and Delta2
-for l in range(6):
-    for beta in range(12):
-        Y = 0
-        for lp in range(6):
-            if lp != l:
-                Y = Y +
-
+for lp in range(6):
+    for betap in range(12):
+        Delta2 = 0
+        for r in range(64):
+            index_i = int(r / 8)
+            index_j = r - index_i * 8
+            Delta2 = Delta2 + np.matmul(vect_gen(S1[lp], index_i, index_i), delta2 - get_Y(S1[lp,], r, lp, betap))
