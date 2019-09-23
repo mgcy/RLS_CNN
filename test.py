@@ -54,12 +54,16 @@ def mean_pool(C):
 
 def inverse_pool(S):
     # inverse pooling
-    wid = int(S.shape[0] * 2)
-    hei = int(S.shape[1] * 2)
-    C = np.zeros((wid, hei))
-    for i1 in range(S.shape[0]):
-        for i2 in range(S.shape[1]):
-            C[i1 * 2:i1 * 2 + 2, i2 * 2:i2 * 2 + 2] = S[i1, i2]
+    dim = int(S.shape[0])
+    wid = int(S.shape[1] * 2)
+    hei = int(S.shape[2] * 2)
+    C = np.zeros((dim, wid, hei))
+    print(C.shape)
+    for i0 in range(dim):
+        print(i0)
+        for i1 in range(S.shape[1]):
+            for i2 in range(S.shape[2]):
+                C[i0, i1 * 2:i1 * 2 + 2, i2 * 2:i2 * 2 + 2] = S[i0, i1, i2]
     return C
 
 
@@ -89,6 +93,18 @@ def F_inverse(f):
     return C
 
 
-S = np.random.rand(6, 4, 4)
+def vect_to_image(s, index_i, index_j):
+    # s with size 25
+    im_s = s.reshape((5, 5))
+    im = np.zeros((12, 12))
+    im[index_i:index_i + 5, index_j:index_j + 5, ] = im_s
+    return im
+
+
+S = np.random.rand(12, 4, 4)
 f = big_F(S)
 back_S = F_inverse(f)
+back_C = inverse_pool(back_S)
+
+s = np.random.rand(25)
+im = vect_to_image(s, 2, 3)
