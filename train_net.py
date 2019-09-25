@@ -120,9 +120,10 @@ def vect_to_image(s, index_i, index_j):
     im[index_i:index_i + 5, index_j:index_j + 5, ] = im_s
     return im
 
+
 ###############################  START   #################################
 # Load the dataset
-nb_samples = 10
+nb_samples = 5
 max_value = 5
 
 (X_train, Y_train), (_, _) = mnist.load_data()
@@ -132,28 +133,30 @@ height = X_train.shape[2]
 
 X = X_train[0:nb_samples].astype(np.float64) / 255.0
 Y = Y_train[0:nb_samples]
-Y_tar = make_target_vector(Y, max_value)  # 10
+Y_tar = np.zeros((nb_samples, 10))  # 10
+for i in range(nb_samples):
+    Y_tar[i] = make_target_vector(Y[i], max_value)
 
 # initialization parameters
-k1 = np.random.uniform(-5, 5, (6, 25))  # 6 x 25
-k2 = np.random.uniform(-5, 5, (6, 12, 25))  # 6 x 12 x 25
-W = np.random.uniform(-5, 5, (192, 10))  # 192 x 10
-# temp results
-C1 = np.zeros((6, 24, 24))  # 6 x 24 x 24
-C2 = np.zeros((12, 8, 8))  # 12 x 8 x 8
-S1 = np.zeros((6, 12, 12))  # 6 x 12 x12
-S2 = np.zeros((12, 4, 4))  # 12 x 4 x 4
-net1 = np.zeros((6, 24, 24))  # 6 x 24 x24
-net2 = np.zeros((12, 8, 8))  # 12 x 8 x 8
-R1 = np.zeros((6, 25, 25))
-R2 = np.zeros((6, 12, 25, 25))
-for i1 in range(6):
-    R1[i1] = np.identity(25)
-    for i2 in range(12):
-        R2[i1, i2] = np.identity(25)
+k1 = np.random.uniform(-1, 1, (6, 25))  # 6 x 25
+k2 = np.random.uniform(-1, 1, (6, 12, 25))  # 6 x 12 x 25
+W = np.random.uniform(-1, 1, (192, 10))  # 192 x 10
 
 ############################### training   #################################
 for t in range(nb_samples):
+    # temp results
+    C1 = np.zeros((6, 24, 24))  # 6 x 24 x 24
+    C2 = np.zeros((12, 8, 8))  # 12 x 8 x 8
+    S1 = np.zeros((6, 12, 12))  # 6 x 12 x12
+    S2 = np.zeros((12, 4, 4))  # 12 x 4 x 4
+    net1 = np.zeros((6, 24, 24))  # 6 x 24 x24
+    net2 = np.zeros((12, 8, 8))  # 12 x 8 x 8
+    R1 = np.zeros((6, 25, 25))
+    R2 = np.zeros((6, 12, 25, 25))
+    for i1 in range(6):
+        R1[i1] = np.identity(25)
+        for i2 in range(12):
+            R2[i1, i2] = np.identity(25)
     # first convolution and pooling
     for f1 in range(6):
         for i1 in range(24):
@@ -186,17 +189,17 @@ for t in range(nb_samples):
     R3 = np.matmul(f, f.reshape(1, 192))  # 192 x 192
     for i in range(10):
         # obtain Delta3
-        delta3 = f * Y_tar[i]
+        delta3 = f * Y_tar[t, i]
         # update W
         P = np.identity(192)
         g = (np.matmul(P, f)) / (1 + np.matmul(np.matmul(ft, P), f))
         P = np.matmul((np.identity(192) - np.matmul(g, ft)), P)
-        W[:, i] = W[:, i] + np.matmul(g, (Y_tar[i] - np.matmul(ft, W[:, i])))
+        W[:, i] = W[:, i] + np.matmul(g, (Y_tar[t, i] - np.matmul(ft, W[:, i])))
 
     # obtain partial L / partial f
     P_f = np.zeros(192)
     for q in range(10):
-        e3 = Y_tar[q] - np.matmul(f.reshape(192), W[:, q])
+        e3 = Y_tar[t, q] - np.matmul(f.reshape(192), W[:, q])
         P_f = P_f - W[:, q] * e3
 
     # obtain partial L / parital S2
@@ -260,12 +263,22 @@ for t in range(nb_samples):
         k1[alphap] = np.matmul(D1, Delta1)
 
 #########################    Testing     ##################
+'''
+# temp results
+C1 = np.zeros((6, 24, 24))  # 6 x 24 x 24
+C2 = np.zeros((12, 8, 8))  # 12 x 8 x 8
+S1 = np.zeros((6, 12, 12))  # 6 x 12 x12
+S2 = np.zeros((12, 4, 4))  # 12 x 4 x 4
+net1 = np.zeros((6, 24, 24))  # 6 x 24 x24
+net2 = np.zeros((12, 8, 8))  # 12 x 8 x 8
 accuracy = 0
 # make testing data
 test_samples = 10
-X = X_train[nb_samples:nb_samples+test_samples].astype(np.float64) / 255.0
-Y = Y_train[nb_samples:nb_samples+test_samples]
-Y_tar = make_target_vector(Y, max_value)  # 10
+X = X_train[nb_samples:nb_samples + test_samples].astype(np.float64) / 255.0
+Y = Y_train[nb_samples:nb_samples + test_samples]
+Y_tar = np.zeros((nb_samples, 10))
+for i in range(nb_samples):
+    Y_tar[i] = make_target_vector(Y[i], max_value)  # 10
 Y_hat = np.zeros(test_samples)
 for t in range(test_samples):
     # first convolution and pooling
@@ -300,3 +313,4 @@ for t in range(test_samples):
 
 acc_precent = accuracy / test_samples
 print(acc_precent)
+'''
